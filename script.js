@@ -1,5 +1,9 @@
 let SpeechRecognition = undefined; 
 
+let logs = [];
+let lastResult = '';
+let lastConfidence = 0;
+
 if (window.webkitSpeechRecognition) {
     document.getElementById('webkit').innerHTML = 'Exists';
 } else {
@@ -33,11 +37,19 @@ for (let key in recognition) {
         propertiesHTML = propertiesHTML + `<td>
         <button onclick='stop()' >stop</button>
         </td>`;
-    } else if (key === 'onaudiostart') {
-        propertiesHTML = propertiesHTML + `<td>
-        <button onclick='log("${key}")' >log</button>
-        </td>`;
-    } else if (key === 'onaudioend') {
+    } else if (
+            key === 'onaudioend' 
+            || key === 'onsoundstart'
+            || key === 'onspeechstart'
+            || key === 'onspeechend'
+            || key === 'onsoundend'
+            || key === 'onresult'
+            || key === 'onnomatch'
+            || key === 'onerror'
+            || key === 'onstart'
+            || key === 'onend'
+            || key === 'onaudiostart'
+        ) {
         propertiesHTML = propertiesHTML + `<td>
         <button onclick='log("${key}")' >log</button>
         </td>`;
@@ -59,6 +71,25 @@ Object.keys(recognition).forEach(key => {
 
 const start = () => {
     recognition.start();
+    logs = [];
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    const miliseconds = now.getMilliseconds();
+
+    lastResult = '';
+    lastConfidence = 0;
+
+    logs.push(
+        { 
+            type: 'start button', 
+            args: 'na', 
+            minutes: minutes, 
+            seconds: seconds,
+            milliseconds: miliseconds
+        }
+        );
+
     console.log('starting the microphone');
 }
 
@@ -73,5 +104,29 @@ const log = (key) => {
 }
 
 const logger = (args) => {
+
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    const miliseconds = now.getMilliseconds();
+
+    if (args.type === 'result') {
+        lastResult = args.results[0][0].transcript;
+        lastConfidence = args.results[0][0].confidence;
+    }
+    logs.push(
+        { 
+            type: args.type, 
+            args: args, 
+            minutes: minutes, 
+            seconds: seconds,
+            milliseconds: miliseconds
+        }
+        );
     console.log(args.type, args.timeStamp, args);
+    if (args.type === 'end') {
+        console.table(logs);
+        console.log(lastResult, lastConfidence);
+    }
+
 }
