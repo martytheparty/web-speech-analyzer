@@ -1,6 +1,7 @@
 let SpeechRecognition = undefined; 
 
 let logs = [];
+let allResults = [];
 let lastResult = '';
 let lastConfidence = 0;
 
@@ -53,6 +54,10 @@ for (let key in recognition) {
         propertiesHTML = propertiesHTML + `<td>
         <button onclick='log("${key}")' >log</button>
         </td>`;
+    } else if (key === 'continuous') {
+        propertiesHTML = propertiesHTML + `<td><input onchange="updateContinous(this)" type="checkbox"></td>`;
+    } else if (key === 'interimResults') {
+        propertiesHTML = propertiesHTML + `<td><input onchange="updateInterim(this)" type="checkbox"></td>`;
     } else {
         propertiesHTML = propertiesHTML + `<td>&nbsp;</td>`;
     }
@@ -72,6 +77,7 @@ Object.keys(recognition).forEach(key => {
 const start = () => {
     recognition.start();
     logs = [];
+    allResults = [];
     const now = new Date();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
@@ -98,6 +104,15 @@ const stop = () => {
     console.log('stoping the microphone');
 }
 
+
+const updateContinous = (caller) => {
+    recognition.continuous = caller.checked;
+}
+
+const updateInterim = (caller) => {
+    recognition.interimResults = caller.checked;
+}
+
 const log = (key) => {
     console.log('adding an event listener', key);
     recognition[key] = logger;
@@ -110,9 +125,28 @@ const logger = (args) => {
     const seconds = now.getSeconds();
     const miliseconds = now.getMilliseconds();
 
+    let minBuffer = '';
+    if (minutes < 10) minBuffer = '0'; 
+    let secBuffer = '';
+    if (seconds < 10) secBuffer = '0';
+
     if (args.type === 'result') {
         lastResult = args.results[0][0].transcript;
         lastConfidence = args.results[0][0].confidence;
+
+        allResults.push({
+            event: 'result',
+            text: lastResult, 
+            confidence: lastConfidence,
+            time: `${minBuffer}${minutes}:${secBuffer}${seconds}.${miliseconds}`
+        });
+    }
+
+    if (args.type === 'speechend') {
+        allResults.push({
+            event: args.type,
+            time: `${minBuffer}${minutes}:${secBuffer}${seconds}.${miliseconds}`
+        });
     }
     logs.push(
         { 
@@ -127,6 +161,8 @@ const logger = (args) => {
     if (args.type === 'end') {
         console.table(logs);
         console.log(lastResult, lastConfidence);
+        console.log(recognition);
+        console.table(allResults);
     }
 
 }
