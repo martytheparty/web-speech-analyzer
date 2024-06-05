@@ -54,6 +54,20 @@ for (let key in recognition) {
         propertiesHTML = propertiesHTML + `<td>
         <button onclick='log("${key}")' >log</button>
         </td>`;
+    } else if (key === 'maxAlternatives') {
+        propertiesHTML = propertiesHTML + `<td>
+        <select onchange="updateMaxAlts(this)">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+        </select>
+        </td>`;
     } else if (key === 'continuous') {
         propertiesHTML = propertiesHTML + `<td><input onchange="updateContinous(this)" type="checkbox"></td>`;
     } else if (key === 'interimResults') {
@@ -138,7 +152,8 @@ const logger = (args) => {
             event: 'result',
             text: lastResult, 
             confidence: lastConfidence,
-            time: `${minBuffer}${minutes}:${secBuffer}${seconds}.${miliseconds}`
+            time: `${minBuffer}${minutes}:${secBuffer}${seconds}.${miliseconds}`,
+            isFinal: args.results[0].isFinal
         });
     }
 
@@ -165,4 +180,8 @@ const logger = (args) => {
         console.table(allResults);
     }
 
+}
+
+const updateMaxAlts = (args) => {
+    recognition.maxAlternatives = args.value;
 }
