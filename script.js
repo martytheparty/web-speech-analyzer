@@ -68,6 +68,20 @@ for (let key in recognition) {
             <option value="9">9</option>
         </select>
         </td>`;
+    } else if (key === 'lang') {
+        propertiesHTML = propertiesHTML + `<td>
+        <select onchange="updateLang(this)">
+            <option value="en-US">en-US</option>
+            <option value="en-GB">en-GB</option>
+            <option value="es-ES">es-ES</option>
+            <option value="es-MX">es-MX</option>
+            <option value="fr-FR">fr-FR</option>
+            <option value="fr-CA">fr-CA</option>
+            <option value="de-DE">de-DE</option>
+            <option value="it-IT">it-IT</option>
+            <option value="ja-JP">ja-JP</option>
+        </select>
+        </td>`;    
     } else if (key === 'continuous') {
         propertiesHTML = propertiesHTML + `<td><input onchange="updateContinous(this)" type="checkbox"></td>`;
     } else if (key === 'interimResults') {
@@ -184,4 +198,10 @@ const logger = (args) => {
 
 const updateMaxAlts = (args) => {
     recognition.maxAlternatives = args.value;
+    console.log(recognition);
+}
+
+const updateLang = (args) => {
+    recognition.lang = args.value;
+    console.log(recognition);
 }
