@@ -1,4 +1,5 @@
 let SpeechRecognition = undefined; 
+let SpeechGrammarList = undefined;
 
 let logs = [];
 let allResults = [];
@@ -6,18 +7,26 @@ let lastResult = '';
 let lastConfidence = 0;
 
 if (window.webkitSpeechRecognition) {
+    SpeechRecognition = window.webkitSpeechRecognition;
     document.getElementById('webkit').innerHTML = 'Exists';
 } else {
     document.getElementById('webkit').innerHTML = 'Undefined';
 }
 
 if (window.SpeechRecognition) {
+    SpeechRecognition = window.SpeechRecognition;
     document.getElementById('normal').innerHTML = 'Exists';
 } else {
     document.getElementById('normal').innerHTML = 'Undefined';
 }
 
-SpeechRecognition =  SpeechRecognition || webkitSpeechRecognition;
+if (window.SpeechGrammarList) {
+    SpeechGrammarList = window.SpeechGrammarList;
+} else if (window.webkitSpeechGrammarList) {
+    SpeechGrammarList = window.webkitSpeechGrammarList;;
+}
+
+
 
 let recognition = new SpeechRecognition();
 
@@ -81,11 +90,38 @@ for (let key in recognition) {
             <option value="it-IT">it-IT</option>
             <option value="ja-JP">ja-JP</option>
         </select>
-        </td>`;    
+        </td>`;  
+        recognition.lang = "en-US";  
     } else if (key === 'continuous') {
         propertiesHTML = propertiesHTML + `<td><input onchange="updateContinous(this)" type="checkbox"></td>`;
     } else if (key === 'interimResults') {
         propertiesHTML = propertiesHTML + `<td><input onchange="updateInterim(this)" type="checkbox"></td>`;
+    } else if (key === "grammars") {
+        propertiesHTML = propertiesHTML + `<td>
+        <table>
+            <tr><td colspan=2>Grammars are not set until the button is clicked</td></tr>
+            <tr>
+                <td>header:</td>
+                <td>
+                    <input id="g-header" type="text" value="#JSGF V1.0;"></input>
+                </td>
+            </tr><tr>
+                <td>grammar name:</td>
+                <td>
+                    <input id="g-name"  type="text" value="grammar colors;"></input>
+                </td>
+            </tr><tr>
+                <td>public rule:</td>
+                <td>
+                    <input id="g-rule"  type="text" value="public <color> = red | blue | green ;"></input>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=2>
+                <button onclick='updateGrammar()' >set grammar</button>
+                </td>
+            </tr>
+        </table></td>`;
     } else {
         propertiesHTML = propertiesHTML + `<td>&nbsp;</td>`;
     }
@@ -143,7 +179,15 @@ const updateInterim = (caller) => {
 
 const log = (key) => {
     console.log('adding an event listener', key);
-    recognition[key] = logger;
+    //recognition[key] = logger;
+
+    if (recognition[key]) {
+        recognition.removeEventListener(key.substring(2), logger)
+    } else {
+        recognition.addEventListener(key.substring(2), logger)
+    }
+
+    console.log(recognition, key);
 }
 
 const logger = (args) => {
@@ -205,3 +249,17 @@ const updateLang = (args) => {
     recognition.lang = args.value;
     console.log(recognition);
 }
+
+const updateGrammar = () => {
+    const header = document.getElementById("g-header").value;
+    const name = document.getElementById("g-name").value;
+    const rule = document.getElementById("g-rule").value;
+   
+    const speechRecognitionList = new webkitSpeechGrammarList();
+
+    speechRecognitionList.addFromString(header + ' ' + name + ' ' + rule, 1)
+    recognition.grammars = speechRecognitionList;
+    console.log('Setting grammars');
+} 
+
+
