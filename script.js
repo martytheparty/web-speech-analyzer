@@ -47,6 +47,10 @@ for (let key in recognition) {
         propertiesHTML = propertiesHTML + `<td>
         <button onclick='stop()' >stop</button>
         </td>`;
+    } else if (key === 'abort') {
+        propertiesHTML = propertiesHTML + `<td>
+        <button onclick='abort()' >abort</button>
+        </td>`;
     } else if (
             key === 'onaudioend' 
             || key === 'onsoundstart'
@@ -61,7 +65,7 @@ for (let key in recognition) {
             || key === 'onaudiostart'
         ) {
         propertiesHTML = propertiesHTML + `<td>
-        <button onclick='log("${key}")' >log</button>
+        <input name="${key}" type="checkbox" onclick='log(this)' ></input>
         </td>`;
     } else if (key === 'maxAlternatives') {
         propertiesHTML = propertiesHTML + `<td>
@@ -163,11 +167,15 @@ const start = () => {
     console.log('starting the microphone');
 }
 
+const abort = () => {
+    recognition.abort();
+    console.log('aborting the microphone');
+}
+
 const stop = () => {
     recognition.stop();
     console.log('stoping the microphone');
 }
-
 
 const updateContinous = (caller) => {
     recognition.continuous = caller.checked;
@@ -177,17 +185,19 @@ const updateInterim = (caller) => {
     recognition.interimResults = caller.checked;
 }
 
-const log = (key) => {
-    console.log('adding an event listener', key);
+const log = (caller) => {
+
     //recognition[key] = logger;
 
-    if (recognition[key]) {
-        recognition.removeEventListener(key.substring(2), logger)
+    if (caller.checked) {
+        console.log('adding an event listener', caller.name);
+        recognition.addEventListener(caller.name.substring(2), logger)
     } else {
-        recognition.addEventListener(key.substring(2), logger)
+        recognition.removeEventListener(caller.name.substring(2), logger)
+        console.log('removing an event listener', caller.name);
     }
 
-    console.log(recognition, key);
+    console.log(recognition, caller.name);
 }
 
 const logger = (args) => {
