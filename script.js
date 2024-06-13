@@ -241,6 +241,7 @@ const logger = (args) => {
         }
         );
     console.log(args.type, args.timeStamp, args);
+    updateLogForLogger();
     if (args.type === 'end') {
         console.table(logs);
         console.log(lastResult, lastConfidence);
@@ -248,6 +249,30 @@ const logger = (args) => {
         console.table(allResults);
     }
 
+}
+
+const updateLogForLogger = () => {
+    const logEle = document.getElementById("logs");
+
+    let logHtml = '<b>Event Listing</b>';
+
+    logs.forEach(
+        (log) => {
+            let minuteBuffer = '';
+            let secondBuffer = '';
+            if (log.minutes < 10) {
+                minuteBuffer = '0';
+            }
+
+            if (log.seconds < 10) {
+                secondBuffer = '0';
+            }
+
+            logHtml = `${logHtml}<br> ${minuteBuffer}${log.minutes}:${secondBuffer}${log.seconds}:${log.milliseconds} ${log.type} `;
+        }
+    );
+
+    logEle.innerHTML = logHtml;
 }
 
 const updateMaxAlts = (args) => {
