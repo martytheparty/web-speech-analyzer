@@ -271,6 +271,17 @@ const updateLogForLogger = () => {
             logHtml = `${logHtml}<br> ${minuteBuffer}${log.minutes}:${secondBuffer}${log.seconds}:${log.milliseconds} ${log.type} `;
         }
     );
+    logHtml = logHtml + '<table><tr><th>time</th><th>text</th><th>confidence</th><th>final</th></tr>';
+    allResults.forEach(
+        (result) => {
+            if (result.event === 'result') {
+                logHtml = logHtml + `<tr><td>${result.time}</td><td> ${result.text} </td><td> ${result.confidence} </td> <td> ${result.isFinal} </td></tr>` ;
+            }
+
+        }
+    );
+
+    logHtml = logHtml + '</table>';
 
     logEle.innerHTML = logHtml;
 }
